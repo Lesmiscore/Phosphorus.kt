@@ -8,6 +8,7 @@ import java.io.RandomAccessFile
 import java.security.MessageDigest
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.math.min
 
 /**
  * Created by nao on 2017/02/09.
@@ -19,26 +20,26 @@ class PharParser(private val f: File) {
         //find stub
         var stubEnd = -1
         RandomAccessFile(f, "r").use { channel ->
-            val tmp = ByteArray(stuB_FINAL_C.size + 20)
-            for (i in 0 until channel.length() - stuB_FINAL_C.size.toLong() - 20) {
+            val tmp = ByteArray(STUB_FINAL_C.size + 20)
+            for (i in 0 until channel.length() - STUB_FINAL_C.size.toLong() - 20) {
                 channel.seek(i)
                 channel.read(tmp)
 
-                stubEnd = Bytes.indexOf(tmp, stuB_FINAL_A)
+                stubEnd = Bytes.indexOf(tmp, STUB_FINAL_A)
                 if (stubEnd != -1) {
-                    stubEnd = (stubEnd.toLong() + i + stuB_FINAL_A.size.toLong()).toInt()
+                    stubEnd = (stubEnd.toLong() + i + STUB_FINAL_A.size.toLong()).toInt()
                     break
                 }
 
-                stubEnd = Bytes.indexOf(tmp, stuB_FINAL_B)
+                stubEnd = Bytes.indexOf(tmp, STUB_FINAL_B)
                 if (stubEnd != -1) {
-                    stubEnd = (stubEnd.toLong() + i + stuB_FINAL_B.size.toLong()).toInt()
+                    stubEnd = (stubEnd.toLong() + i + STUB_FINAL_B.size.toLong()).toInt()
                     break
                 }
 
-                stubEnd = Bytes.indexOf(tmp, stuB_FINAL_C)
+                stubEnd = Bytes.indexOf(tmp, STUB_FINAL_C)
                 if (stubEnd != -1) {
-                    stubEnd = (stubEnd.toLong() + i + stuB_FINAL_C.size.toLong()).toInt()
+                    stubEnd = (stubEnd.toLong() + i + STUB_FINAL_C.size.toLong()).toInt()
                 }
             }
 
@@ -105,7 +106,6 @@ class PharParser(private val f: File) {
             if (hashSize != 16 && hashSize != 20) {
                 listener.onEvent(ErrorEvent(IllegalStateException("Wrong hash size: " + hashSize.toString())))
                 return
-
             }
 
             val hash = ByteArray(hashSize)
@@ -125,7 +125,7 @@ class PharParser(private val f: File) {
                 val tmp = ByteArray(1024)
                 val digest = MessageDigest.getInstance(sig!!.hashNameFromFlag)
                 while (readRemaining != 0L) {
-                    val toRead = Math.min(readRemaining, tmp.size.toLong()).toInt()
+                    val toRead = min(readRemaining, tmp.size.toLong()).toInt()
                     val actualRead = channel.read(tmp, 0, toRead)
                     readRemaining -= actualRead.toLong()
                     digest.update(tmp, 0, actualRead)
@@ -144,8 +144,8 @@ class PharParser(private val f: File) {
     }
 
     companion object {
-        val stuB_FINAL_A: ByteArray = "?>".toByteArray()
-        val stuB_FINAL_B: ByteArray = "__HALT_COMPILER();".toByteArray()
-        val stuB_FINAL_C: ByteArray = "__halt_compiler();".toByteArray()
+        val STUB_FINAL_A: ByteArray = "?>".toByteArray()
+        val STUB_FINAL_B: ByteArray = "__HALT_COMPILER();".toByteArray()
+        val STUB_FINAL_C: ByteArray = "__halt_compiler();".toByteArray()
     }
 }

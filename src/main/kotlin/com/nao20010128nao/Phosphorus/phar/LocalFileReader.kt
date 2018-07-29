@@ -1,9 +1,11 @@
 package com.nao20010128nao.Phosphorus.phar
 
-import org.codehaus.groovy.runtime.*
-
-import java.io.*
-import java.nio.*
+import java.io.Closeable
+import java.io.DataInputStream
+import java.io.File
+import java.io.IOException
+import java.nio.ByteBuffer
+import java.nio.ByteOrder
 
 /**
  * Created by nao on 2017/02/09.
@@ -31,7 +33,7 @@ class LocalFileReader(f: File) : Closeable {
             return ByteBuffer.wrap(buffer).order(ByteOrder.BIG_ENDIAN).short
         }
 
-    private val fis: DataInputStream = ResourceGroovyMethods.newDataInputStream(f)
+    private val fis: DataInputStream = DataInputStream(f.inputStream())
 
     fun get(): Byte = fis.read().toByte()
 
