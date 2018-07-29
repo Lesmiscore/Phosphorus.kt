@@ -7,3 +7,5 @@ local.properties
 *#*#
 libs/
 test/
+.idea/
+
